@@ -89,7 +89,13 @@ class HeatSentinelBiLSTMPredictor:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.model = BiLSTMHeatwaveModel(input_dim=len(self.features), hidden_dim=128).to(self.device)
         self.is_trained = False
-        self.train_on_historical_dataset(epochs=25)
+        if MODEL_WEIGHTS_PATH.exists():
+            self.model.load_state_dict(torch.load(MODEL_WEIGHTS_PATH, map_location=self.device))
+            self.is_trained = True
+            print(f"✅ Loaded pre-trained Bi-LSTM model weights from {MODEL_WEIGHTS_PATH}")
+        else:
+            self.train_on_historical_dataset(epochs=25)
+
 
     def train_on_historical_dataset(self, epochs: int = 25, batch_size: int = 64):
         if not PARQUET_PATH.exists():
