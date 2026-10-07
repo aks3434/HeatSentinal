@@ -44,7 +44,14 @@ class HeatSentinelXGBoostPredictor:
             self.reg = XGBRegressor(max_iter=150, random_state=42)
 
         self.is_trained = False
-        self.train_on_historical_dataset()
+        if XGB_AVAILABLE and XGB_CLF_PATH.exists() and XGB_REG_PATH.exists():
+            self.clf.load_model(XGB_CLF_PATH)
+            self.reg.load_model(XGB_REG_PATH)
+            self.is_trained = True
+            print(f"✅ Loaded pre-trained XGBoost models from {XGB_CLF_PATH}")
+        else:
+            self.train_on_historical_dataset()
+
 
     def train_on_historical_dataset(self):
         """Trains XGBoost on historical weather records and saves model weights to disk."""
